@@ -14,6 +14,28 @@ This repository contains two scripts designed to **temporarily isolate a Windows
 - PowerShell 5.1+
 - Wazuh agent installed (optional for log monitoring)
 
+## 🛠️ Script Location & Behavior
+## 📁 Script Path
+By default, the batch wrapper isolate-wrapper.bat is configured to run the PowerShell script from the user’s Desktop:
+powershell -NoProfile -ExecutionPolicy Bypass -File "%USERPROFILE%\Desktop\isolate-then-restore.ps1"
+
+For proper integration with Wazuh, it is recommended to place the script in the official Wazuh agent directory:
+C:\Program Files (x86)\ossec-agent\active-response\bin\
+
+Then, update the batch file to point to the new location:
+powershell -NoProfile -ExecutionPolicy Bypass -File "C:\Program Files (x86)\ossec-agent\active-response\bin\isolate-then-restore.ps1"
+
+## 🔄 Optional: Prevent automatic reconnection
+By default, the script restores all network adapters after 60 seconds to avoid permanent isolation in manual test scenarios.
+If you want to use this script for true one-way isolation, such as during real threats, you should remove or comment out the restoration block, which starts here:
+Write-Host "`nWaiting 60 seconds before restoring..." -ForegroundColor Yellow
+
+and ends here:
+Write-WazuhLog "Connection restored"
+Write-Host "`nRestoration completed. Network should be active again." -ForegroundColor Cyan
+This way, the host will remain isolated until manually reconnected by an analyst.
+
+
 ## 📂 Log location
 
 Logs are written to: C:\Program Files (x86)\ossec-agent\active-response\wazuh_isolation.log
